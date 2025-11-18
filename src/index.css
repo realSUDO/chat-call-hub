@@ -8,6 +8,14 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Dark theme - Navy (#2F4156) as base */
+    --background: 210 30% 12%;
+    --foreground: 0 0% 95%;
+
+    /* Card backgrounds - slightly lighter */
+    --card: 210 25% 16%;
+    --card-foreground: 0 0% 95%;
+
     /* Navy (#2F4156) - Primary brand color */
     --primary: 210 30% 26%;
     --primary-foreground: 0 0% 100%;
@@ -16,51 +24,47 @@ All colors MUST be HSL.
     --secondary: 199 25% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Beige (#F5EFEB) - Main background */
-    --background: 30 29% 94%;
-    --foreground: 210 30% 26%;
-
-    /* Sky Blue (#CBDBE6) - Accents */
-    --accent: 203 33% 85%;
-    --accent-foreground: 210 30% 26%;
-
-    /* Card backgrounds */
-    --card: 0 0% 100%;
-    --card-foreground: 210 30% 26%;
+    /* Accent - Sky Blue tinted */
+    --accent: 203 30% 22%;
+    --accent-foreground: 203 33% 85%;
 
     /* Muted elements */
-    --muted: 203 33% 85%;
-    --muted-foreground: 199 20% 40%;
+    --muted: 210 25% 18%;
+    --muted-foreground: 0 0% 60%;
 
     /* Popover */
-    --popover: 0 0% 100%;
-    --popover-foreground: 210 30% 26%;
+    --popover: 210 25% 16%;
+    --popover-foreground: 0 0% 95%;
 
     /* Borders and inputs */
-    --border: 203 25% 80%;
-    --input: 203 25% 80%;
+    --border: 210 25% 22%;
+    --input: 210 25% 18%;
     --ring: 199 25% 45%;
 
     /* Destructive */
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 62.8% 50.6%;
     --destructive-foreground: 0 0% 100%;
 
     --radius: 0.75rem;
 
-    /* Sidebar specific */
-    --sidebar-background: 210 30% 26%;
-    --sidebar-foreground: 0 0% 100%;
+    /* Sidebar specific - darker navy */
+    --sidebar-background: 210 35% 10%;
+    --sidebar-foreground: 0 0% 95%;
     --sidebar-primary: 199 25% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 30% 22%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 210 25% 32%;
+    --sidebar-accent: 210 30% 16%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 210 30% 18%;
     --sidebar-ring: 199 25% 45%;
 
     /* Chat specific colors */
     --chat-user-message: 199 25% 45%;
-    --chat-ai-message: 0 0% 100%;
-    --chat-input: 0 0% 100%;
+    --chat-ai-message: 210 25% 16%;
+    --chat-input: 210 25% 16%;
+    
+    /* Glow effects */
+    --glow-primary: 199 25% 45%;
+    --glow-secondary: 203 33% 60%;
   }
 }
 
@@ -71,5 +75,20 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .glow-effect {
+    box-shadow: 0 0 20px rgba(86, 124, 141, 0.3);
+  }
+  
+  .message-hover {
+    @apply transition-all duration-200 hover:bg-accent/30;
+  }
+  
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: rgba(47, 65, 86, 0.6);
   }
 }
