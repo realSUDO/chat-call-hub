@@ -3,6 +3,7 @@ import { ChatSidebar } from "@/components/ChatSidebar";
 import { ChatHeader } from "@/components/ChatHeader";
 import { ChatInterface } from "@/components/ChatInterface";
 import { ChatInput } from "@/components/ChatInput";
+import CallScreen from "@/components/CallScreen";
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -20,6 +21,7 @@ interface ChatHistory {
 
 const Index = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isCallActive, setIsCallActive] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatHistories, setChatHistories] = useState<ChatHistory[]>([
     {
@@ -83,14 +85,21 @@ const Index = () => {
   };
 
   const handleCallClick = () => {
+    setIsCallActive(true);
+  };
+
+  const handleEndCall = () => {
+    setIsCallActive(false);
     toast({
-      title: "Call feature",
-      description: "Voice call feature coming soon!",
+      title: "Call ended",
+      description: "Voice call has been disconnected",
     });
   };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
+      {isCallActive && <CallScreen onEndCall={handleEndCall} />}
+      
       <ChatSidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}

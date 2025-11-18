@@ -1,14 +1,29 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MessageSquarePlus, Newspaper, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import CallScreen from "@/components/CallScreen";
 import { useToast } from "@/hooks/use-toast";
 
 const Landing = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isCallActive, setIsCallActive] = useState(false);
 
   const handleStartChat = () => {
     navigate("/chat");
+  };
+
+  const handleCallClick = () => {
+    setIsCallActive(true);
+  };
+
+  const handleEndCall = () => {
+    setIsCallActive(false);
+    toast({
+      title: "Call ended",
+      description: "Voice call has been disconnected",
+    });
   };
 
   const handleComingSoon = (feature: string) => {
@@ -20,6 +35,7 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background animate-fade-in">
+      {isCallActive && <CallScreen onEndCall={handleEndCall} />}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl" />
@@ -58,7 +74,7 @@ const Landing = () => {
             size="icon"
             variant="outline"
             className="h-16 w-16 rounded-full border-2 border-secondary/50 hover:border-secondary hover:bg-secondary/10 transition-all duration-300 hover:scale-110 glow-effect"
-            onClick={() => handleComingSoon("Call")}
+            onClick={handleCallClick}
           >
             <Phone className="h-6 w-6 text-secondary" />
           </Button>
