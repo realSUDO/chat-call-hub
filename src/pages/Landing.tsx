@@ -4,6 +4,7 @@ import { MessageSquarePlus, Newspaper, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CallScreen from "@/components/CallScreen";
 import { useToast } from "@/hooks/use-toast";
+import { joinVoiceChannel, leaveVoiceChannel } from "@/services/agoraVoice";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -16,21 +17,12 @@ const Landing = () => {
 
   const handleCallClick = async () => {
     try {
-      const response = await fetch('http://localhost:3001/voice/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      const data = await response.json();
-      
-      // Use Web Speech API
-      const utterance = new SpeechSynthesisUtterance(data.message);
-      const voices = speechSynthesis.getVoices();
-      utterance.voice = voices.find(voice => voice.lang === 'en-US') || voices[0];
-      utterance.rate = 0.9;
-      utterance.pitch = 1.2;
-      speechSynthesis.speak(utterance);
-      
+      await joinVoiceChannel();
       setIsCallActive(true);
+      toast({
+        title: "Voice call started",
+        description: "Connected to voice channel",
+      });
     } catch (error) {
       toast({
         title: "Call failed",
@@ -41,16 +33,7 @@ const Landing = () => {
   };
 
   const handleEndCall = async () => {
-    try {
-      await fetch('http://localhost:3001/voice/stop', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
-      speechSynthesis.cancel();
-    } catch (error) {
-      speechSynthesis.cancel();
-    }
-    
+    await leaveVoiceChannel();
     setIsCallActive(false);
     toast({
       title: "Call ended",

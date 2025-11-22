@@ -24,3 +24,10 @@ dist-ssr
 *.sw?
 
 *.bak
+
+# Environment files
+.env
+
+# Markdown notes (except README)
+*.md
+!README.md

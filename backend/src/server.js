@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { spawn } from 'child_process';
 import { startVoice, stopVoice } from './voiceResponse.js';
+import { startAIAgent, stopAIAgent } from './agoraAI.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -65,6 +66,9 @@ app.post('/chat', async (req, res) => {
 
 app.post('/voice/start', startVoice);
 app.post('/voice/stop', stopVoice);
+
+app.post('/ai/start', startAIAgent);
+app.post('/ai/stop', stopAIAgent);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
