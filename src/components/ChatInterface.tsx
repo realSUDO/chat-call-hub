@@ -15,16 +15,14 @@ interface ChatInterfaceProps {
 }
 
 export const ChatInterface = ({ messages }: ChatInterfaceProps) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
-    <ScrollArea className="flex-1" ref={scrollRef}>
+    <ScrollArea className="flex-1">
       {messages.length === 0 ? (
         <div className="flex items-center justify-center h-full text-center px-4">
           <div className="max-w-2xl space-y-8 animate-fade-in">
@@ -57,10 +55,11 @@ export const ChatInterface = ({ messages }: ChatInterfaceProps) => {
           </div>
         </div>
       ) : (
-        <div>
+        <div className="max-w-5xl mx-auto px-4">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
           ))}
+          <div ref={messagesEndRef} />
         </div>
       )}
     </ScrollArea>

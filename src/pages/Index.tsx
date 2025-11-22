@@ -43,7 +43,7 @@ const Index = () => {
   const [currentChatId, setCurrentChatId] = useState("current");
   const { toast } = useToast();
 
-  const handleSendMessage = (content: string) => {
+  const handleSendMessage = async (content: string) => {
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
@@ -53,15 +53,45 @@ const Index = () => {
 
     setMessages((prev) => [...prev, userMessage]);
 
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Couldn't connect to the server. Try again later",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-    }, 1000);
+    // Add loading message
+    const loadingId = (Date.now() + 1).toString();
+    const loadingMessage: Message = {
+      id: loadingId,
+      role: "assistant",
+      content: "...",
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, loadingMessage]);
+
+    try {
+      const response = await fetch('http://localhost:3001/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: content, lawyerMode: true })
+      });
+
+      if (!response.ok) throw new Error('Server error');
+
+      const data = await response.json();
+      
+      // Replace loading message with actual response
+      setMessages((prev) => 
+        prev.map(msg => 
+          msg.id === loadingId 
+            ? { ...msg, content: data.reply }
+            : msg
+        )
+      );
+    } catch (error) {
+      // Replace loading message with error
+      setMessages((prev) => 
+        prev.map(msg => 
+          msg.id === loadingId 
+            ? { ...msg, content: "Couldn't connect to the server. Try again later" }
+            : msg
+        )
+      );
+    }
   };
 
   const handleNewChat = () => {
@@ -82,11 +112,43 @@ const Index = () => {
     });
   };
 
-  const handleCallClick = () => {
-    setIsCallActive(true);
+  const handleCallClick = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/voice/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+      
+      // Use Web Speech API
+      const utterance = new SpeechSynthesisUtterance(data.message);
+      const voices = speechSynthesis.getVoices();
+      utterance.voice = voices.find(voice => voice.lang === 'en-US') || voices[0];
+      utterance.rate = 0.9;
+      utterance.pitch = 1.2;
+      speechSynthesis.speak(utterance);
+      
+      setIsCallActive(true);
+    } catch (error) {
+      toast({
+        title: "Call failed",
+        description: "Couldn't connect to voice service",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEndCall = () => {
+  const handleEndCall = async () => {
+    try {
+      await fetch('http://localhost:3001/voice/stop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      speechSynthesis.cancel();
+    } catch (error) {
+      speechSynthesis.cancel();
+    }
+    
     setIsCallActive(false);
     toast({
       title: "Call ended",

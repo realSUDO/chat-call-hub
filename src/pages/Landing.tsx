@@ -14,11 +14,43 @@ const Landing = () => {
     navigate("/chat");
   };
 
-  const handleCallClick = () => {
-    setIsCallActive(true);
+  const handleCallClick = async () => {
+    try {
+      const response = await fetch('http://localhost:3001/voice/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+      
+      // Use Web Speech API
+      const utterance = new SpeechSynthesisUtterance(data.message);
+      const voices = speechSynthesis.getVoices();
+      utterance.voice = voices.find(voice => voice.lang === 'en-US') || voices[0];
+      utterance.rate = 0.9;
+      utterance.pitch = 1.2;
+      speechSynthesis.speak(utterance);
+      
+      setIsCallActive(true);
+    } catch (error) {
+      toast({
+        title: "Call failed",
+        description: "Couldn't connect to voice service",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleEndCall = () => {
+  const handleEndCall = async () => {
+    try {
+      await fetch('http://localhost:3001/voice/stop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      speechSynthesis.cancel();
+    } catch (error) {
+      speechSynthesis.cancel();
+    }
+    
     setIsCallActive(false);
     toast({
       title: "Call ended",
