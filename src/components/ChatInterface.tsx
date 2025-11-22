@@ -35,14 +35,14 @@ export const ChatInterface = ({ messages }: ChatInterfaceProps) => {
               </p>
             </div>
             <p className="text-foreground/70 text-base leading-relaxed">
-              Start a conversation, ask questions, or upload a PDF to analyze. I'm here to help!
+              Ask me about Indian Constitution, legal rights, or any legal matter!
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 max-w-xl mx-auto">
               {[
-                "Explain a complex topic",
-                "Help with code debugging",
-                "Analyze a document",
-                "Creative brainstorming"
+                "What are fundamental rights?",
+                "Explain Article 21",
+                "Legal remedies available",
+                "Constitutional amendments"
               ].map((suggestion, i) => (
                 <div
                   key={i}

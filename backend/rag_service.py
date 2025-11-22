@@ -39,32 +39,37 @@ with open(CHUNKS_PATH, 'r') as f:
 genai.configure(api_key=GEMINI_API_KEY)
 gemini = genai.GenerativeModel('gemini-2.5-flash-lite')
 
-# Guardrails
-LEGAL_KEYWORDS = [
-    'law', 'legal', 'constitution', 'right', 'article', 'act', 'court', 'justice',
-    'fundamental', 'amendment', 'parliament', 'judiciary', 'legislation', 'statute',
-    'regulation', 'provision', 'clause', 'section', 'criminal', 'civil', 'case'
+# Guardrails - Block prompt injections and harmful content
+PROMPT_INJECTION_PATTERNS = [
+    r'ignore (previous|all|above|prior) (instructions|prompts|rules)',
+    r'forget (everything|all|previous|prior)',
+    r'you are (now|a) (new|different)',
+    r'system prompt',
+    r'act as',
+    r'pretend (you are|to be)',
+    r'disregard (previous|all|above)',
 ]
 
 HARMFUL_PATTERNS = [
-    r'\b(hack|exploit|illegal|violence|harm|weapon|drug)\b',
-    r'\b(bypass|evade|cheat|fraud)\b'
+    r'\b(bomb|terrorist|kill|murder|suicide|weapon)\b',
 ]
 
 def check_query_relevance(query):
-    """Check if query is legal-related"""
+    """Check for prompt injections and harmful content"""
     query_lower = query.lower()
     
-    # Check for harmful content
+    # Block prompt injection attempts
+    for pattern in PROMPT_INJECTION_PATTERNS:
+        if re.search(pattern, query_lower):
+            return False, "I'm LaWEase, a legal assistant. I can only help with legal and constitutional matters."
+    
+    # Block harmful content
     for pattern in HARMFUL_PATTERNS:
         if re.search(pattern, query_lower):
-            return False, "I can only assist with legal and constitutional queries."
+            return False, "I cannot assist with harmful or dangerous queries."
     
-    # Check for legal keywords
-    if any(keyword in query_lower for keyword in LEGAL_KEYWORDS):
-        return True, None
-    
-    return False, "I'm a legal assistant specialized in Indian Constitution. Please ask questions related to law, constitution, or legal matters."
+    # Allow everything else - LLM will handle topic relevance
+    return True, None
 
 def check_response_safety(response):
     """Check if response is safe and on-topic"""
