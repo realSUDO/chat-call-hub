@@ -1,58 +1,27 @@
 import express from 'express';
 import cors from 'cors';
-import { spawn } from 'child_process';
 import { startVoice, stopVoice } from './voiceResponse.js';
 import { startAIAgent, stopAIAgent } from './agoraAI.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = 3001;
 
 app.use(cors());
 app.use(express.json());
 
-function callRagService(message, lawyerMode = false) {
-  return new Promise((resolve, reject) => {
-    const python = spawn('python3', [path.join(__dirname, '../rag_service.py')]);
-    
-    let output = '';
-    let error = '';
-    
-    python.stdin.write(JSON.stringify({ message, lawyerMode }));
-    python.stdin.end();
-    
-    python.stdout.on('data', (data) => {
-      output += data.toString();
-    });
-    
-    python.stderr.on('data', (data) => {
-      error += data.toString();
-    });
-    
-    python.on('close', (code) => {
-      if (code !== 0) {
-        reject(new Error(error || 'RAG service failed'));
-      } else {
-        try {
-          const result = JSON.parse(output);
-          resolve(result.response);
-        } catch (e) {
-          reject(new Error('Invalid response from RAG service'));
-        }
-      }
-    });
-  });
-}
-
 app.post('/chat', async (req, res) => {
-  const { message, lawyerMode } = req.body;
+  const { message } = req.body;
   
   try {
-    const reply = await callRagService(message, lawyerMode);
+    const response = await fetch('http://localhost:5001/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    const data = await response.json();
+    
     res.json({
-      reply,
+      reply: data.response,
       timestamp: new Date().toISOString()
     });
   } catch (error) {
