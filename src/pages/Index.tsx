@@ -5,7 +5,7 @@ import { ChatInterface } from "@/components/ChatInterface";
 import { ChatInput } from "@/components/ChatInput";
 import CallScreen from "@/components/CallScreen";
 import { useToast } from "@/hooks/use-toast";
-import { joinVoiceChannel, leaveVoiceChannel } from "@/services/agoraVoice";
+import { joinVoiceChannel, leaveVoiceChannel, toggleMute, onAgentSpeaking } from "@/services/agoraVoice";
 
 interface Message {
   id: string;
@@ -23,6 +23,8 @@ interface ChatHistory {
 const Index = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isAgentSpeaking, setIsAgentSpeaking] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatHistories, setChatHistories] = useState<ChatHistory[]>([
     {
@@ -116,6 +118,7 @@ const Index = () => {
   const handleCallClick = async () => {
     try {
       await joinVoiceChannel();
+      onAgentSpeaking(setIsAgentSpeaking);
       setIsCallActive(true);
       toast({
         title: "Voice call started",
@@ -133,15 +136,21 @@ const Index = () => {
   const handleEndCall = async () => {
     await leaveVoiceChannel();
     setIsCallActive(false);
+    setIsMuted(false);
     toast({
       title: "Call ended",
       description: "Voice call has been disconnected",
     });
   };
 
+  const handleToggleMute = () => {
+    const muted = toggleMute();
+    setIsMuted(muted);
+  };
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      {isCallActive && <CallScreen onEndCall={handleEndCall} />}
+      {isCallActive && <CallScreen onEndCall={handleEndCall} onToggleMute={handleToggleMute} isMuted={isMuted} isAgentSpeaking={isAgentSpeaking} />}
       
       <ChatSidebar
         isOpen={isSidebarOpen}

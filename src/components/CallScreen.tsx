@@ -1,25 +1,27 @@
 import { Mic, MicOff, PhoneOff } from "lucide-react";
 import { AudioLines } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
 interface CallScreenProps {
   onEndCall: () => void;
+  onToggleMute: () => void;
+  isMuted: boolean;
+  isAgentSpeaking: boolean;
 }
 
-const CallScreen = ({ onEndCall }: CallScreenProps) => {
-  const [isMuted, setIsMuted] = useState(false);
-
+const CallScreen = ({ onEndCall, onToggleMute, isMuted, isAgentSpeaking }: CallScreenProps) => {
   return (
     <div className="fixed inset-0 z-50 bg-background flex flex-col items-center justify-center animate-fade-in">
       {/* Animated waves background - CENTERED */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
-        <div className="relative">
-          <div className="w-64 h-64 rounded-full bg-secondary/20 animate-[ping_3s_ease-in-out_infinite]" />
-          <div className="absolute inset-0 w-64 h-64 rounded-full bg-secondary/15 animate-[ping_3s_ease-in-out_infinite_1s]" />
-          <div className="absolute inset-0 w-64 h-64 rounded-full bg-secondary/10 animate-[ping_3s_ease-in-out_infinite_2s]" />
+      {isAgentSpeaking && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
+          <div className="relative">
+            <div className="w-64 h-64 rounded-full bg-secondary/20 animate-[ping_3s_ease-in-out_infinite]" />
+            <div className="absolute inset-0 w-64 h-64 rounded-full bg-secondary/15 animate-[ping_3s_ease-in-out_infinite_1s]" />
+            <div className="absolute inset-0 w-64 h-64 rounded-full bg-secondary/10 animate-[ping_3s_ease-in-out_infinite_2s]" />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Center circle with gradient - CENTERED */}
       <div className="relative z-10 flex flex-col items-center justify-center gap-8">
@@ -47,7 +49,7 @@ const CallScreen = ({ onEndCall }: CallScreenProps) => {
           size="icon"
           variant={isMuted ? "destructive" : "outline"}
           className="h-20 w-20 rounded-full border-2 transition-all duration-300 hover:scale-110 glow-effect"
-          onClick={() => setIsMuted(!isMuted)}
+          onClick={onToggleMute}
         >
           {isMuted ? (
             <MicOff className="h-7 w-7" />

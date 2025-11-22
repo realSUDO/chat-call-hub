@@ -2,6 +2,8 @@ import AgoraRTC, { IAgoraRTCClient, IMicrophoneAudioTrack } from "agora-rtc-sdk-
 
 let client: IAgoraRTCClient | null = null;
 let localAudioTrack: IMicrophoneAudioTrack | null = null;
+let isAgentSpeaking = false;
+let speakingCallback: ((speaking: boolean) => void) | null = null;
 
 const APP_ID = import.meta.env.VITE_AGORA_APP_ID || "";
 const CHANNEL = import.meta.env.VITE_AGORA_CHANNEL || "channel1";
@@ -28,6 +30,18 @@ function setupEventListeners() {
   client.on("user-unpublished", async (user) => {
     console.log("user unpublished", user);
   });
+
+  client.on("volume-indicator", (volumes) => {
+    volumes.forEach((volume) => {
+      if (volume.uid === 1001) {
+        const speaking = volume.level > 5;
+        if (speaking !== isAgentSpeaking) {
+          isAgentSpeaking = speaking;
+          speakingCallback?.(speaking);
+        }
+      }
+    });
+  });
 }
 
 async function createLocalAudioTrack() {
@@ -45,6 +59,8 @@ export async function joinVoiceChannel() {
   await client!.join(APP_ID, CHANNEL, TOKEN, uid);
   await createLocalAudioTrack();
   await client!.publish([localAudioTrack!]);
+  
+  client!.enableAudioVolumeIndicator();
   
   console.log("Joined voice channel");
   
@@ -91,4 +107,16 @@ export async function leaveVoiceChannel() {
 
 export function isInVoiceChannel() {
   return client !== null;
+}
+
+export function toggleMute(): boolean {
+  if (!localAudioTrack) return false;
+  const newMutedState = !localAudioTrack.muted;
+  localAudioTrack.setMuted(newMutedState);
+  console.log("Microphone muted:", newMutedState);
+  return newMutedState;
+}
+
+export function onAgentSpeaking(callback: (speaking: boolean) => void) {
+  speakingCallback = callback;
 }
